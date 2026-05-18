@@ -633,17 +633,14 @@ const AboutSection = () => {
 
           <div className="mt-10 border-t border-white/10 pt-8 flex items-center justify-between">
             <div>
-              <p className="font-playfair text-2xl text-white">Shubham Singh</p>
+              <p className="font-playfair text-2xl text-white">Saraj Kamat</p>
               <p className="text-[10px] uppercase tracking-widest text-[#D4AF37] mt-1">
                 Founder & Lead Photographer
               </p>
             </div>
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Signature_placeholder.svg"
-              className="h-8 md:h-10 opacity-60 invert"
-              alt="Signature"
-              loading="lazy"
-            />
+            <div className="font-playfair italic text-3xl text-white opacity-60 tracking-wider">
+              Saraj.
+            </div>
           </div>
         </div>
       </div>
@@ -1942,7 +1939,7 @@ const FloatingActions = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
-      {/* WhatsApp Button */}
+      {/* WhatsApp Button
       <a
         href="https://wa.me/919876543210"
         target="_blank"
@@ -1951,16 +1948,16 @@ const FloatingActions = () => {
         className="w-12 h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:-translate-y-1 transition-transform duration-300"
       >
         <MessageCircle size={22} strokeWidth={2} />
-      </a>
+      </a> */}
 
       {/* Concierge Chatbot Button */}
-      <button
+      {/* <button
         onClick={() => setIsChatOpen(!isChatOpen)}
         aria-label="Open Studio Concierge"
         className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${isChatOpen ? "bg-zinc-800 text-white" : "bg-[#D4AF37] text-zinc-950 hover:-translate-y-1"}`}
       >
         {isChatOpen ? <X size={22} /> : <Sparkles size={22} />}
-      </button>
+      </button> */}
 
       {/* Refined AI Assistant Panel */}
       <AnimatePresence>
