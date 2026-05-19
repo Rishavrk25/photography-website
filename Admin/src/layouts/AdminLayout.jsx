@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { HiHome, HiPhotograph, HiFilm, HiCalendar, HiStar, HiCurrencyDollar, HiMail, HiLogout, HiMenuAlt2, HiX } from 'react-icons/hi';
+import { HiHome, HiPhotograph, HiFilm, HiCalendar, HiStar, HiCurrencyDollar, HiMail, HiLogout, HiMenuAlt2, HiX, HiUserGroup } from 'react-icons/hi';
 import { getUser, logout } from '../utils/api';
 
 const navItems = [
   { name: 'Dashboard', path: '/admin', icon: <HiHome /> },
-  { name: 'Gallery', path: '/admin/gallery', icon: <HiPhotograph /> },
-  { name: 'Videos', path: '/admin/videos', icon: <HiFilm /> },
+  { name: 'Users', path: '/admin/clients', icon: <HiUserGroup /> },
   { name: 'Bookings', path: '/admin/bookings', icon: <HiCalendar /> },
   { name: 'Testimonials', path: '/admin/testimonials', icon: <HiStar /> },
   { name: 'Packages', path: '/admin/packages', icon: <HiCurrencyDollar /> },

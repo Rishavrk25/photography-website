@@ -134,4 +134,97 @@ class PackageController extends Controller
 
         return response()->json(['data' => $files]);
     }
+
+    // Admin uploads a ZIP file to extract to gallery
+    public function uploadGalleryZip(Request $request)
+    {
+        $request->validate([
+            'booking_id' => 'required|integer',
+            'file'       => 'required|file',
+        ]);
+
+        $bookingId   = $request->input('booking_id');
+        $file        = $request->file('file');
+        $zipRealPath = $file->getRealPath();
+
+        $extractPath = storage_path('app/public/galleries/' . $bookingId);
+        if (!file_exists($extractPath)) {
+            mkdir($extractPath, 0755, true);
+        }
+
+        $extracted = false;
+
+        // Attempt 1: ZipArchive (PHP ext-zip)
+        if (class_exists('ZipArchive')) {
+            $zip = new \ZipArchive();
+            $opened = $zip->open($zipRealPath);
+            if ($opened === true) {
+                $zip->extractTo($extractPath);
+                $zip->close();
+                $extracted = true;
+            }
+        }
+
+        // Attempt 2: PowerShell Expand-Archive (Windows fallback)
+        if (!$extracted) {
+            $zipWin     = str_replace('/', '\\', $zipRealPath);
+            $destWin    = str_replace('/', '\\', $extractPath);
+            $cmd        = "powershell -Command \"Expand-Archive -LiteralPath '$zipWin' -DestinationPath '$destWin' -Force\" 2>&1";
+            shell_exec($cmd);
+
+            // Check if files were actually extracted
+            $files = glob($extractPath . '/*');
+            if ($files && count($files) > 0) {
+                $extracted = true;
+            }
+        }
+
+        if (!$extracted) {
+            return response()->json(['message' => 'Failed to extract ZIP file. Please ensure it is a valid ZIP.'], 500);
+        }
+
+        // Update booking status
+        $booking = \App\Models\Booking::find($bookingId);
+        if ($booking) {
+            $booking->status = 'Delivered';
+            $booking->save();
+        }
+
+        return response()->json(['message' => 'Gallery ZIP uploaded and extracted successfully']);
+    }
+
+    // Delete/remove gallery files and reset status
+    public function deleteGallery($id)
+    {
+        $dir = storage_path('app/public/galleries/' . $id);
+        if (is_dir($dir)) {
+            $this->deleteDirRecursive($dir);
+        }
+
+        $booking = \App\Models\Booking::find($id);
+        if ($booking) {
+            $booking->status = 'confirmed';
+            $booking->save();
+        }
+
+        return response()->json(['message' => 'Gallery removed successfully']);
+    }
+
+    private function deleteDirRecursive($dir) {
+        if (!file_exists($dir)) {
+            return true;
+        }
+        if (!is_dir($dir)) {
+            return unlink($dir);
+        }
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+            if (!$this->deleteDirRecursive($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+        }
+        return rmdir($dir);
+    }
 }

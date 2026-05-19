@@ -24,6 +24,7 @@ export const logout = () => api.post("/logout");
 export const adminAPI = {
   // Dashboard endpoints
   getDashboard: () => api.get("/admin/dashboard"),
+  getUsers: () => api.get("/admin/users"),
 
   // Booking endpoints
   getBookings: () => api.get("/bookings"),
@@ -44,6 +45,12 @@ export const adminAPI = {
   downloadPackage: (id) =>
     api.get(`/admin/packages/${id}/download`, { responseType: "blob" }),
   getGalleryFiles: (id) => api.get(`/admin/galleries/${id}/files`),
+  deleteGallery: (id) => api.delete(`/admin/galleries/${id}`),
+
+  // Testimonials endpoints
+  getTestimonials: () => api.get("/testimonials"),
+  updateTestimonialStatus: (id, status) => api.patch(`/testimonials/${id}/status`, { status }),
+  deleteTestimonial: (id) => api.delete(`/testimonials/${id}`),
 };
 
 export default api;

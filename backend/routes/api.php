@@ -7,12 +7,17 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\TestimonialController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Public inquiry endpoint
 Route::post('/inquiries', [InquiryController::class, 'store']);
+
+// Public testimonials endpoint
+Route::get('/testimonials', [TestimonialController::class, 'publicIndex']);
+Route::post('/testimonials', [TestimonialController::class, 'store']);
 
 // Public booking endpoint
 // (Moved inside auth middleware)
@@ -28,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin dashboard endpoints
     Route::get('/admin/dashboard', [AdminController::class, 'getDashboard']);
+    Route::get('/admin/users', [AuthController::class, 'getUsers']);
 
     // Admin inquiry endpoints
     Route::get('/inquiries', [InquiryController::class, 'index']);
@@ -41,10 +47,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
+    // Admin testimonials endpoints
+    Route::get('/testimonials', [TestimonialController::class, 'index']);
+    Route::patch('/testimonials/{id}/status', [TestimonialController::class, 'updateStatus']);
+    Route::delete('/testimonials/{id}', [TestimonialController::class, 'destroy']);
+
     // Admin package endpoints
     Route::post('/admin/packages/send', [PackageController::class, 'send']);
     Route::get('/admin/packages', [PackageController::class, 'index']);
     Route::get('/admin/packages/{id}/download', [PackageController::class, 'download']);
     // Gallery file listing for admin to pick files
     Route::get('/admin/galleries/{id}/files', [PackageController::class, 'listGalleryFiles']);
+    // Upload ZIP to gallery
+    Route::post('/admin/galleries/upload', [PackageController::class, 'uploadGalleryZip']);
+    // Delete/remove gallery
+    Route::delete('/admin/galleries/{id}', [PackageController::class, 'deleteGallery']);
 });

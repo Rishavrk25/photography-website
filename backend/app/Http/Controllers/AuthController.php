@@ -66,4 +66,13 @@ class AuthController extends Controller
             'message' => 'User logged out successfully'
         ], 200);
     }
+
+    public function getUsers()
+    {
+        $users = User::orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'message' => 'Users retrieved successfully',
+            'data' => $users
+        ]);
+    }
 }

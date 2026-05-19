@@ -992,7 +992,7 @@ const PricingSection = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/bookings", {
+      const response = await fetch("http://127.0.0.1:8000/api/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1385,6 +1385,94 @@ const PricingSection = () => {
 };
 
 const TestimonialsSection = () => {
+  const { user } = useAuth();
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewName, setReviewName] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setReviewName(user.name || "");
+    }
+  }, [user]);
+
+  const fetchTestimonials = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/testimonials");
+      const data = await response.json();
+      if (data.data && data.data.length > 0) {
+        // Map backend format to frontend format
+        const mapped = data.data.map(t => ({
+          name: t.client_name,
+          text: t.content,
+          rating: t.rating,
+          date: new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        }));
+        setTestimonials(mapped.slice(0, 5));
+      } else {
+        setTestimonials(REVIEWS);
+      }
+    } catch (err) {
+      console.error("Failed to fetch testimonials:", err);
+      setTestimonials(REVIEWS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewName.trim() || !reviewContent.trim()) {
+      setError("Please fill out all fields.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/testimonials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          client_name: reviewName,
+          rating: reviewRating,
+          content: reviewContent
+        })
+      });
+      if (res.ok) {
+        setSubmitSuccess(true);
+        setReviewContent("");
+        setReviewRating(5);
+        fetchTestimonials();
+        setTimeout(() => {
+          setSubmitSuccess(false);
+          setShowReviewForm(false);
+        }, 4000);
+      } else {
+        const errData = await res.json();
+        setError(errData.message || "Failed to submit review.");
+      }
+    } catch (err) {
+      setError("Failed to connect to the server.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const displayReviews = testimonials.length > 0 ? testimonials : REVIEWS;
+
   return (
     <section className="py-24 md:py-32 bg-zinc-900 border-y border-white/5 overflow-hidden">
       <SectionHeader
@@ -1394,49 +1482,172 @@ const TestimonialsSection = () => {
       />
 
       {/* Smooth Infinite Marquee */}
-      <div className="relative w-full flex overflow-x-hidden pt-8 pb-12">
-        <motion.div
-          className="flex whitespace-nowrap gap-6 md:gap-8 px-4"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
-        >
-          {/* Double the array for seamless loop */}
-          {[...REVIEWS, ...REVIEWS].map((review, i) => (
-            <div
-              key={i}
-              className="w-[300px] md:w-[450px] inline-flex flex-col whitespace-normal bg-zinc-950 p-8 md:p-10 border border-white/5"
-            >
-              <div className="flex text-[#D4AF37] mb-6">
-                {[...Array(review.rating)].map((_, idx) => (
-                  <Star
-                    key={idx}
-                    size={14}
-                    fill="currentColor"
-                    className="mr-1"
-                  />
-                ))}
-              </div>
-              <p className="text-zinc-300 font-playfair italic mb-8 leading-relaxed text-lg md:text-xl flex-1">
-                "{review.text}"
-              </p>
-              <div className="flex justify-between items-end border-t border-white/10 pt-6 mt-auto">
-                <div>
-                  <h4 className="font-medium text-white tracking-wide text-sm">
-                    {review.name}
-                  </h4>
-                  <p className="text-zinc-500 text-[10px] uppercase tracking-widest mt-1">
-                    Happily Married
-                  </p>
+      {!loading && (
+        <div className="relative w-full flex overflow-x-hidden pt-8 pb-12">
+          <motion.div
+            className="flex whitespace-nowrap gap-6 md:gap-8 px-4"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
+          >
+            {/* Double the array for seamless loop */}
+            {[...displayReviews, ...displayReviews].map((review, i) => (
+              <div
+                key={i}
+                className="w-[300px] md:w-[450px] inline-flex flex-col whitespace-normal bg-zinc-950 p-8 md:p-10 border border-white/5"
+              >
+                <div className="flex text-[#D4AF37] mb-6">
+                  {[...Array(review.rating)].map((_, idx) => (
+                    <Star
+                      key={idx}
+                      size={14}
+                      fill="currentColor"
+                      className="mr-1"
+                    />
+                  ))}
                 </div>
-                <span className="text-zinc-600 text-xs">{review.date}</span>
+                <p className="text-zinc-300 font-playfair italic mb-8 leading-relaxed text-lg md:text-xl flex-1">
+                  "{review.text}"
+                </p>
+                <div className="flex justify-between items-end border-t border-white/10 pt-6 mt-auto">
+                  <div>
+                    <h4 className="font-medium text-white tracking-wide text-sm">
+                      {review.name}
+                    </h4>
+                    <p className="text-zinc-500 text-[10px] uppercase tracking-widest mt-1">
+                      Happily Married
+                    </p>
+                  </div>
+                  <span className="text-zinc-600 text-xs">{review.date}</span>
+                </div>
               </div>
-            </div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
 
-        {/* Elegant Fade Edges */}
-        <div className="absolute top-0 left-0 w-24 md:w-48 h-full bg-gradient-to-r from-zinc-900 to-transparent pointer-events-none" />
-        <div className="absolute top-0 right-0 w-24 md:w-48 h-full bg-gradient-to-l from-zinc-900 to-transparent pointer-events-none" />
+          {/* Elegant Fade Edges */}
+          <div className="absolute top-0 left-0 w-24 md:w-48 h-full bg-gradient-to-r from-zinc-900 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-24 md:w-48 h-full bg-gradient-to-l from-zinc-900 to-transparent pointer-events-none" />
+        </div>
+      )}
+
+      {/* Share Experience Button */}
+      <div className="flex flex-col items-center justify-center mt-8 px-6">
+        {!showReviewForm ? (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowReviewForm(true)}
+            className="border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-zinc-950 px-8 py-3.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.15)] hover:shadow-[0_0_25px_rgba(212,175,55,0.35)]"
+          >
+            Share Your Experience
+          </motion.button>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-xl bg-zinc-950 border border-[#D4AF37]/20 p-8 md:p-10 rounded-3xl relative z-10 shadow-2xl"
+          >
+            <div className="text-center mb-8">
+              <h3 className="font-playfair text-2xl text-white font-medium">Write a Review</h3>
+              <p className="text-xs text-zinc-400 mt-2">Your feedback keeps our camera rolling</p>
+            </div>
+
+            {submitSuccess ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8 space-y-4"
+              >
+                <div className="w-16 h-16 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto text-[#D4AF37]">
+                  <CheckCircle2 size={32} />
+                </div>
+                <h4 className="font-playfair text-xl text-white">Review Submitted!</h4>
+                <p className="text-sm text-zinc-400 max-w-sm mx-auto leading-relaxed">
+                  Thank you! Your testimonial has been received and will appear on the site once approved by the admin.
+                </p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmitReview} className="space-y-6">
+                {error && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl text-center font-medium">
+                    {error}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[10px] font-medium text-zinc-400 uppercase tracking-widest mb-2.5">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={reviewName}
+                    onChange={(e) => setReviewName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#D4AF37]/50 focus:outline-none focus:bg-zinc-800/40 transition-all duration-300"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-medium text-zinc-400 uppercase tracking-widest mb-2.5">
+                    Rating
+                  </label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="text-2xl transition-all duration-200"
+                      >
+                        <Star
+                          size={24}
+                          fill={star <= reviewRating ? "#D4AF37" : "transparent"}
+                          stroke={star <= reviewRating ? "#D4AF37" : "#555"}
+                          className="hover:scale-110 transition-transform"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-medium text-zinc-400 uppercase tracking-widest mb-2.5">
+                    Your Review
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={reviewContent}
+                    onChange={(e) => setReviewContent(e.target.value)}
+                    placeholder="Share details of your wedding/shoot experience with us..."
+                    className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#D4AF37]/50 focus:outline-none focus:bg-zinc-800/40 transition-all duration-300 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewForm(false)}
+                    className="flex-1 border border-white/10 hover:border-white/20 text-white font-medium py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-zinc-950 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {submitting ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      "Submit Review"
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </motion.div>
+        )}
       </div>
     </section>
   );
@@ -1496,7 +1707,7 @@ const ContactSection = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:8000/api/inquiries", {
+      const response = await fetch("http://127.0.0.1:8000/api/inquiries", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
