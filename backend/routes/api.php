@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PackageController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -24,6 +26,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Protected booking endpoint
     Route::post('/bookings', [BookingController::class, 'store']);
 
+    // Admin dashboard endpoints
+    Route::get('/admin/dashboard', [AdminController::class, 'getDashboard']);
+
     // Admin inquiry endpoints
     Route::get('/inquiries', [InquiryController::class, 'index']);
     Route::get('/inquiries/{id}', [InquiryController::class, 'show']);
@@ -35,4 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
     Route::patch('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
+
+    // Admin package endpoints
+    Route::post('/admin/packages/send', [PackageController::class, 'send']);
+    Route::get('/admin/packages', [PackageController::class, 'index']);
+    Route::get('/admin/packages/{id}/download', [PackageController::class, 'download']);
+    // Gallery file listing for admin to pick files
+    Route::get('/admin/galleries/{id}/files', [PackageController::class, 'listGalleryFiles']);
 });

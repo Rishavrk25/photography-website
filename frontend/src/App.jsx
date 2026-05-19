@@ -4,6 +4,7 @@ import { AuthProvider } from "./AuthContext";
 import Home from "./Home";
 import Login from "./Login";
 import Register from "./Register";
+import Packages from "./Packages";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/packages" element={<Packages />} />
         </Routes>
       </AuthProvider>
     </Router>
