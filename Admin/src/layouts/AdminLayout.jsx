@@ -20,13 +20,36 @@ export default function AdminLayout() {
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
-    if (!token) { navigate('/admin/login'); return; }
-    getUser().then(({ data }) => setUser(data)).catch(() => { localStorage.removeItem('auth_token'); navigate('/admin/login'); });
+    const isAdmin = localStorage.getItem('is_admin');
+
+    if (!token || isAdmin !== 'true') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('is_admin');
+      navigate('/admin/login');
+      return;
+    }
+
+    getUser()
+      .then(({ data }) => {
+        if (data.email !== 'admin@shubhamvideo.com') {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('is_admin');
+          navigate('/admin/login');
+          return;
+        }
+        setUser(data);
+      })
+      .catch(() => {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('is_admin');
+        navigate('/admin/login');
+      });
   }, [navigate]);
 
   const handleLogout = async () => {
     try { await logout(); } catch { }
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('is_admin');
     navigate('/admin/login');
   };
 

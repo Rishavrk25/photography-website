@@ -1,21 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../utils/api';
 
 export default function Login() {
-  const [email, setEmail] = useState('admin@shubhamvideo.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Always clear existing session when landing on the login page to guarantee the form is shown
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('is_admin');
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     try {
       const response = await login({ email, password });
+      
+      // Enforce that only the admin user account from the database is allowed entry
+      if (response.data.user.email !== 'admin@shubhamvideo.com') {
+        setError('Unauthorized access. Only the designated administrator can log in.');
+        setLoading(false);
+        return;
+      }
+
       localStorage.setItem('auth_token', response.data.access_token);
+      localStorage.setItem('is_admin', 'true');
       navigate('/admin');
     } catch (err) {
       if (err.message === 'Network Error') {

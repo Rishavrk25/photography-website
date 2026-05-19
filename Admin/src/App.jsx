@@ -18,8 +18,8 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/admin/login" replace />} />
+        <Route path="/login" element={<Navigate to="/admin/login" replace />} />
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
@@ -29,7 +29,7 @@ export default function App() {
           <Route path="testimonials" element={<TestimonialsManager />} />
           <Route path="packages" element={<PackagesManager />} />
         </Route>
-        <Route path="*" element={<Navigate to="/admin" replace />} />
+        <Route path="*" element={<Navigate to="/admin/login" replace />} />
       </Routes>
     </Router>
   );
