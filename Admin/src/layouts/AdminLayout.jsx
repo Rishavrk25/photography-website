@@ -31,7 +31,7 @@ export default function AdminLayout() {
 
     getUser()
       .then(({ data }) => {
-        if (data.email !== 'admin@shubhamvideo.com') {
+        if (data.email !== 'admin@gmail.com') {
           localStorage.removeItem('auth_token');
           localStorage.removeItem('is_admin');
           navigate('/admin/login');
@@ -100,8 +100,8 @@ export default function AdminLayout() {
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-cream p-2"><HiMenuAlt2 size={22} /></button>
           <h2 className="font-heading text-lg font-semibold text-cream">{navItems.find(i => i.path === location.pathname)?.name || 'Admin'}</h2>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-soft/60">{user.name}</span>
-            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-sm font-bold">{user.name[0]}</div>
+            <span className="text-sm text-gray-soft/60">{user.name || 'Admin'}</span>
+            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-sm font-bold">{(user.name || 'Admin')[0]}</div>
           </div>
         </header>
         <main className="p-4 lg:p-8"><Outlet /></main>

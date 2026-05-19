@@ -24,7 +24,7 @@ export default function Login() {
       const response = await login({ email, password });
       
       // Enforce that only the admin user account from the database is allowed entry
-      if (response.data.user.email !== 'admin@shubhamvideo.com') {
+      if (response.data.user.email !== 'admin@gmail.com') {
         setError('Unauthorized access. Only the designated administrator can log in.');
         setLoading(false);
         return;
@@ -72,7 +72,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-[#111]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream focus:border-gold/50 focus:outline-none focus:bg-[#1a1a1a]/80 transition-all"
-              placeholder="admin@studio.com"
+              placeholder="admin@gmail.com"
               required
             />
           </div>

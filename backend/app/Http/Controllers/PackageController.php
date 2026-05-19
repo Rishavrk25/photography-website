@@ -97,8 +97,8 @@ class PackageController extends Controller
         $package = Package::findOrFail($id);
         $user = $request->user();
 
-        // Allow if admin (sanctum user with is_admin?) or owner
-        if ($user && ($user->id === $package->user_id || $user->email === $package->client_email)) {
+        // Allow if admin (Admin model instance) or owner
+        if ($user && ($user instanceof \App\Models\Admin || $user->id === $package->user_id || $user->email === $package->client_email)) {
             $zipPath = storage_path('app/public/' . $package->zip_path);
             if (file_exists($zipPath)) {
                 return response()->download($zipPath, basename($zipPath));

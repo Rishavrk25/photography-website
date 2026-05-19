@@ -40,6 +40,19 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Try authenticating as Admin first
+        $admin = \App\Models\Admin::where('email', $request->email)->first();
+        if ($admin && Hash::check($request->password, $admin->password)) {
+            $token = $admin->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'message' => 'Admin logged in successfully',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $admin
+            ], 200);
+        }
+
+        // Default User authentication
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Invalid login credentials'
